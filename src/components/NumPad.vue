@@ -72,17 +72,23 @@ export default {
     // Comparing users guess and the target number
     checkGuess(initVal,guessVal) {
       var guessArr = ("" + guessVal).split("");
-	  var initArr = ("" + initVal).split("");
-	  var _100correct=0; var _50correct=0;
+      var initArr = ("" + initVal).split("");
+      var _100correct=0; var _50correct=0;
       for (let i = 0; i < initArr.length; i++) {
         if(initArr.includes(guessArr[i]))
-			if(guessArr[i] === initArr[i])
-				_100correct++;
-			else
-				_50correct++;
-      console.log(_100correct, _50correct);
-	  }
-      return true;
+            if(guessArr[i] === initArr[i])
+                _100correct++;
+            else
+                _50correct--;
+      }
+      if(_100correct===4)
+        return "+4";
+      else if(_50correct===-4)
+        return "" + _50correct;
+      else if(!_100correct && _50correct)
+        return "0";
+      else
+        return "+" + _100correct + " / " + _50correct;
     }
   },
 
