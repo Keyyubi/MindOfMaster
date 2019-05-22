@@ -145,11 +145,36 @@ export default {
           else this.errorText = "Rakamlar farkli olsun pliz";
           break;
       }
+    },
+    fromKeyboard(e) {
+      switch (e.key) {
+        case '1': 
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '0':
+          this.numberClick(Number(e.key));
+          break;
+        case 'Enter':
+          this.numberClick(11);
+          break;
+        case 'Escape': case' ':
+          this.numberClick(-1);
+          break;
+      }
     }
   },
 
   created() {
     this.Init();
+    window.addEventListener("keydown", e => {
+      this.fromKeyboard(e);
+    });
   }
 };
 </script>
