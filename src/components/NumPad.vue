@@ -1,28 +1,50 @@
 <template>
-  <div class="numPad-container">
-    <div>
-      <input type="text" max="9876" min="1234" class="inp-guess brd-tl brd-tr" :value="initVal">
+  <div class="container">
+    <div class="row">
+      <div class="col-6 numPad-container">
+        <div class="guess-container">{{guessVal}}</div>
+        <ul class="numPad">
+          <li @click="numberClick(1)" class="num-btn">1</li>
+          <li @click="numberClick(2)" class="num-btn mid">2</li>
+          <li @click="numberClick(3)" class="num-btn">3</li>
+        </ul>
+        <ul class="numPad">
+          <li @click="numberClick(4)" class="num-btn">4</li>
+          <li @click="numberClick(5)" class="num-btn mid">5</li>
+          <li @click="numberClick(6)" class="num-btn">6</li>
+        </ul>
+        <ul class="numPad">
+          <li @click="numberClick(7)" class="num-btn">7</li>
+          <li @click="numberClick(8)" class="num-btn mid">8</li>
+          <li @click="numberClick(9)" class="num-btn">9</li>
+        </ul>
+        <ul class="numPad">
+          <li @click="numberClick(11)" class="num-btn brd-bl btn-ok">
+            <i class="fas fa-check"></i>
+          </li>
+          <li @click="numberClick(0)" class="num-btn mid">0</li>
+          <li @click="numberClick(-1)" class="num-btn brd-br btn-cancel">
+            <i class="fas fa-times"></i>
+          </li>
+        </ul>
+        <div
+          class="alert alert-secondary mt-2"
+          role="alert"
+          v-show="resultText.length > 0"
+        >{{resultText}}</div>
+        <div
+          class="alert alert-danger mt-2"
+          role="alert"
+          v-show="errorText.length > 0"
+        >{{errorText}}</div>
+        <div class="info-text"></div>
+      </div>
+      <div class="col-6 guess-history">
+        <ul class="history">
+          <li v-for="(item,key) in history" :key="key" v-html="item">{{item}}</li>
+        </ul>
+      </div>
     </div>
-    <ul class="numPad">
-      <li class="num-btn">1</li>
-      <li class="num-btn mid">2</li>
-      <li class="num-btn">3</li>
-    </ul>
-    <ul class="numPad">
-      <li class="num-btn">4</li>
-      <li class="num-btn mid">5</li>
-      <li class="num-btn">6</li>
-    </ul>
-    <ul class="numPad">
-      <li class="num-btn">7</li>
-      <li class="num-btn mid">8</li>
-      <li class="num-btn">9</li>
-    </ul>
-    <ul class="numPad">
-      <li class="num-btn brd-bl">OK</li>
-      <li class="num-btn mid">0</li>
-      <li class="num-btn brd-br">X</li>
-    </ul>
   </div>
 </template>
 
@@ -31,7 +53,10 @@ export default {
   data() {
     return {
       guessVal: "",
-      initVal: ""
+      initVal: "",
+      history: [],
+      errorText: "",
+      resultText: ""
     };
   },
   methods: {
@@ -55,8 +80,10 @@ export default {
     // For comparing all digits to see
     // if all digits diffirent from each other or not
     // returns true if number is valid, otherwise returns false (not valid)
-    checkDigits(integer) {
-      var arr = ("" + integer).split("");
+    checkDigits(strDigit) {
+      if (strDigit.length < 2) return true;
+
+      var arr = strDigit.split("");
       for (let i = 0; i < arr.length; i++) {
         let val = arr[i];
         if (i < 4) {
@@ -68,27 +95,56 @@ export default {
       }
       return true;
     },
-    
+
     // Comparing users guess and the target number
-    checkGuess(initVal,guessVal) {
+    checkGuess(guessVal) {
       var guessArr = ("" + guessVal).split("");
-      var initArr = ("" + initVal).split("");
-      var _100correct=0; var _50correct=0;
+      var initArr = ("" + this.initVal).split("");
+      var _100correct = 0;
+      var _50correct = 0;
       for (let i = 0; i < initArr.length; i++) {
-        if(initArr.includes(guessArr[i]))
-            if(guessArr[i] === initArr[i])
-                _100correct++;
-            else
-                _50correct--;
+        if (initArr.includes(guessArr[i]))
+          if (guessArr[i] === initArr[i]) _100correct++;
+          else _50correct--;
       }
-      if(_100correct===4)
-        return "+4";
-      else if(_50correct===-4)
-        return "" + _50correct;
-      else if(!_100correct && !_50correct)
-        return "0";
-      else
-        return "+" + _100correct + " / " + _50correct;
+      if (_100correct === 4) return "+4";
+      else if (_50correct === -4) return "" + _50correct;
+      else if (!_100correct && !_50correct) return "0";
+      else return "+" + _100correct + " / " + _50correct;
+    },
+
+    numberClick(number) {
+      switch (number) {
+        // Cancel butonu
+        case -1:
+          this.guessVal = "";
+          break;
+        // Tahmin butonu
+        case 11:
+          if (this.guessVal.length !== 4) {
+            if (this.guessVal.length === 0)
+              this.errorText = "Bisey girmedinki :(";
+            else this.errorText = "4 basamakli sayi gir 4! 4!";
+            return;
+          }
+          this.resultText = this.checkGuess(this.guessVal);
+          this.history.push(this.guessVal + " --> " + this.resultText);
+          break;
+        // NumPad Sayi butonlari
+        default:
+          if (this.guessVal.length === 4 || this.guessVal.length === 0) {
+            if (number === 0) {
+              this.errorText = "0 ile baslanmaz";
+              return;
+            } else {
+              this.guessVal = "";
+            }
+          }
+          var newVal = this.guessVal + number;
+          if (this.checkDigits(newVal)) this.guessVal = newVal;
+          else this.errorText = "Rakamlar farkli olsun pliz";
+          break;
+      }
     }
   },
 
@@ -100,43 +156,67 @@ export default {
 
 <style lang="scss">
 .numPad-container {
-  width: 30vw;
+  width: 24vw;
   height: auto;
-  margin: 5vh auto;
-}
-.numPad {
-  display: flex;
-  padding: 0;
-  margin: 0;
-  border-bottom: #fff 1px solid;
-}
-.num-btn {
-  background-color: #ccc;
-  width: 10vw;
-  height: 10vw;
-  list-style-type: none;
-  text-align: center;
-  line-height: 10vw;
-  cursor: pointer;
-}
-
-.num-btn:active {
-  background-color: rgb(236, 236, 236);
-}
-
-.numPad .mid {
-  border-left: #fff 1px solid;
-  border-right: #fff 1px solid;
-}
-
-.inp-guess {
-  width: 98%;
-  height: 6vw;
-  padding: 10px 0;
   margin: 0 auto;
-  text-align: center;
-  font-size: 2.3rem;
-  border: 1px solid #ccc;
+  position: relative;
+
+  .numPad {
+    display: flex;
+    padding: 0;
+    margin: 0;
+    border-bottom: #fff 1px solid;
+    justify-content: center;
+
+    .num-btn {
+      background-color: hsl(0, 0%, 95%);
+      width: 8vw;
+      height: 8vw;
+      border-radius: 50%;
+      list-style-type: none;
+      text-align: center;
+      line-height: 8vw;
+      font-size: 2rem;
+      font-weight: 400;
+      cursor: pointer;
+
+      &:active {
+        background-color: rgb(236, 236, 236);
+      }
+    }
+
+    .btn-ok {
+      color: hsl(125, 98%, 23%);
+    }
+
+    .btn-cancel {
+      color: hsl(0, 79%, 37%);
+    }
+
+    .mid {
+      border-left: #fff 1px solid;
+      border-right: #fff 1px solid;
+    }
+  }
+
+  .guess-container {
+    width: 98%;
+    min-height: 15vh;
+    height: auto;
+    padding: 10px 0;
+    margin: 1vh auto;
+    text-align: center;
+    font-size: 4rem;
+    border-radius: 5px;
+  }
+}
+
+.guess-history {
+  .history {
+    li {
+      list-style-type: none;
+    }
+  }
 }
 
 /* top-left border radius */
