@@ -85,7 +85,7 @@ export default {
         return "+4";
       else if(_50correct===-4)
         return "" + _50correct;
-      else if(!_100correct && _50correct)
+      else if(!_100correct && !_50correct)
         return "0";
       else
         return "+" + _100correct + " / " + _50correct;
