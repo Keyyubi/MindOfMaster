@@ -1,7 +1,7 @@
 <template>
   <div class="container">
-    <div class="row">
-      <div class="col-6 numPad-container">
+    <div class="row justify-content-center">
+      <div class="col-8 numPad-container">
         <div class="guess-container">{{guessVal}}</div>
         <ul class="numPad">
           <li @click="numberClick(1)" class="num-btn">1</li>
@@ -27,22 +27,22 @@
             <i class="fas fa-times"></i>
           </li>
         </ul>
-        <div
-          class="alert alert-secondary mt-2"
-          role="alert"
-          v-show="resultText.length > 0"
-        >{{resultText}}</div>
-        <div
-          class="alert alert-danger mt-2"
-          role="alert"
-          v-show="errorText.length > 0"
-        >{{errorText}}</div>
-        <div class="info-text"></div>
+        <div class="info-text" :class="getClass()">{{infoText}}</div>
       </div>
-      <div class="col-6 guess-history">
-        <ul class="history">
-          <li v-for="(item,key) in history" :key="key" v-html="item">{{item}}</li>
-        </ul>
+      <div class="col-3 guess-history">
+        <h3>Guesses Made</h3>
+        <hr>
+
+        <div class="row text-muted" v-for="(item,key) in history" :key="key">
+          <div class="col-6">
+            <strong>Guess:</strong>
+            {{item.guess}}
+          </div>
+          <div class="col-6">
+            <strong>Result:</strong>
+            {{item.result}}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -55,8 +55,8 @@ export default {
       guessVal: "",
       initVal: "",
       history: [],
-      errorText: "",
-      resultText: ""
+      error: false,
+      infoText: ""
     };
   },
   methods: {
@@ -114,6 +114,8 @@ export default {
     },
 
     numberClick(number) {
+      this.error = false;
+      this.infoText = "";
       switch (number) {
         // Cancel butonu
         case -1:
@@ -122,13 +124,21 @@ export default {
         // Tahmin butonu
         case 11:
           if (this.guessVal.length !== 4) {
-            if (this.guessVal.length === 0)
-              this.errorText = "Bisey girmedinki :(";
-            else this.errorText = "4 basamakli sayi gir 4! 4!";
+            if (this.guessVal.length === 0) {
+              this.error = true;
+              this.infoText = "Bisey girmedinki :(";
+            } else {
+              this.error = true;
+              this.infoText = "4 basamakli sayi gir 4! 4!";
+            }
             return;
           }
-          this.resultText = this.checkGuess(this.guessVal);
-          this.history.push(this.guessVal + " --> " + this.resultText);
+          this.infoText = this.checkGuess(this.guessVal);
+          this.history.push({
+            guess: this.guessVal,
+            result: this.infoText
+          });
+          this.guessVal = '';
           break;
         // NumPad Sayi butonlari
         default:
@@ -141,32 +151,43 @@ export default {
             }
           }
           var newVal = this.guessVal + number;
-          if (this.checkDigits(newVal)) this.guessVal = newVal;
-          else this.errorText = "Rakamlar farkli olsun pliz";
+          if (this.checkDigits(newVal)) {
+            this.guessVal = newVal;
+          } else {
+            this.error = true;
+            this.infoText = "Rakamlar farkli olsun pliz";
+          }
           break;
       }
     },
+
     fromKeyboard(e) {
       switch (e.key) {
-        case '1': 
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-        case '0':
+        case "1":
+        case "2":
+        case "3":
+        case "4":
+        case "5":
+        case "6":
+        case "7":
+        case "8":
+        case "9":
+        case "0":
           this.numberClick(Number(e.key));
           break;
-        case 'Enter':
+        case "Enter":
           this.numberClick(11);
           break;
-        case 'Escape': case' ':
+        case "Escape":
+        case " ":
           this.numberClick(-1);
           break;
       }
+    },
+
+    // Styling info text according to error
+    getClass() {
+      return this.error ? "text-danger" : "text-info";
     }
   },
 
@@ -181,9 +202,9 @@ export default {
 
 <style lang="scss">
 .numPad-container {
-  width: 24vw;
+  width: auto;
   height: auto;
-  margin: 0 auto;
+  // margin: 0 auto;
   position: relative;
 
   .numPad {
