@@ -134,6 +134,13 @@ export default {
             return;
           }
           this.infoText = this.checkGuess(this.guessVal);
+          if(this.infoText === "+4") {
+            alert("We Have WINNER! \n Play again!");
+            this.history = [];
+            this.Init();
+            this.guessVal = '';
+            return;
+          }
           this.history.push({
             guess: this.guessVal,
             result: this.infoText
